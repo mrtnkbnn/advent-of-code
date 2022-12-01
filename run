@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+# Change working dir
+cd "$1"
+
+# Compile
+g++ -std=c++17 "$2".cpp -o "$2"
+
+# Execute
+start_time=$(date +%s%N);
+./"$2"
+end_time=$(date +%s%N);
+
+# Print 
+elapsed_time=$(((end_time - start_time) / 1000000))
+echo "Running took ${elapsed_time}ms"
+
+# Cleanup
+rm ./"$2";

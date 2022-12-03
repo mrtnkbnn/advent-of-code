@@ -3,7 +3,7 @@ set -e
 
 year=$1
 day=$2
-ext="${3:-in}"
+ext=$3
 
 # Compile
 g++ -std=c++17 "$year/$day.cpp" -o "$day"

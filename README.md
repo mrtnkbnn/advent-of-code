@@ -1,13 +1,12 @@
 My [Advent of Code] solutions.
 
-Compile and run with example input (requires `g++`):
+Runner script requires `g++`.
+
+Usage:
 ```
-./run 2022 01 ex
+./run <year> <day> <input_type (example/real)>
 ```
 
-Compile and run with real input (requires `g++`):
-```
-./run 2022 01 in
-```
+Example inputs for each day are included.
 
 [Advent of Code]: https://adventofcode.com/

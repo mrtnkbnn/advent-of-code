@@ -2,11 +2,10 @@
 using namespace std;
 
 int main() {
-    ifstream input("inputs/01.in");
     string line;
     vector<int> calories;
     int cur = 0;
-    while (getline(input, line)) {
+    while (getline(cin, line)) {
         if (line.empty()) {
             calories.push_back(cur);
             cur = 0;

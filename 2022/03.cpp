@@ -10,10 +10,9 @@ int main() {
         ++priority;
     }
     vector<string> lines;
-    ifstream input("inputs/03.in");
     string line;
     int part1 = 0, part2 = 0;
-    while (getline(input, line)) {
+    while (getline(cin, line)) {
         lines.push_back(line);
         string compartment1 = line.substr(0, line.length()/2);
         string compartment2 = line.substr(line.length()/2);

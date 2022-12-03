@@ -1,15 +1,16 @@
 #!/bin/bash
 set -e
 
-# Change working dir
-cd "$1"
+year=$1
+day=$2
+ext="${3:-in}"
 
 # Compile
-g++ -std=c++17 "$2".cpp -o "$2"
+g++ -std=c++17 "$year/$day.cpp" -o "$day"
 
 # Execute
 start_time=$(date +%s%N);
-./"$2"
+"./$day" < "$year/inputs/$day.$ext"
 end_time=$(date +%s%N);
 
 # Print 
@@ -17,4 +18,4 @@ elapsed_time=$(((end_time - start_time) / 1000000))
 echo "Running took ${elapsed_time}ms"
 
 # Cleanup
-rm ./"$2";
+rm "./$day";

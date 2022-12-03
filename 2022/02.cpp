@@ -29,10 +29,9 @@ int main() {
         {"C Y", 'Z'},
         {"C Z", 'X'}
     };
-    ifstream input("inputs/02.in");
     string line;
     int part1 = 0, part2 = 0;
-    while (getline(input, line)) {
+    while (getline(cin, line)) {
         part1 += outcome_scores[line] + shape_scores[line[2]];
         char chosen_shape = choose_shape[line];
         line[2] = chosen_shape;

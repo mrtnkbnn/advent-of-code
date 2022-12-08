@@ -12,22 +12,8 @@ struct tree {
 };
 
 tree* measure(vector<vector<int>> trees, int x, int y, int X, int Y) {
-    bool leftVisible, rightVisible, upVisible, downVisible;
+    bool leftVisible = true, rightVisible = true, upVisible = true, downVisible = true;
     int leftDist = 0, rightDist = 0, upDist = 0, downDist = 0;
-    if (x == 0) {
-        leftDist = 0;
-        leftVisible = true;
-    } else if (x == X - 1) {
-        rightDist = 0;
-        rightVisible = true;
-    } else if (y == 0) {
-        upDist = 0;
-        upVisible = true;
-    } else if (y == Y - 1) {
-        downDist = 0;
-        downVisible = true;
-    }
-
     int h = trees[y][x];
     for (int i = x - 1; i >= 0; --i) {
         int cur = trees[y][i];

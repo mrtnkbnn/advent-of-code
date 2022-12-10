@@ -37,9 +37,7 @@ int main() {
             for (int i = 1; i < 10; ++i) {
                 pos head = knots[i - 1];
                 pos tail = knots[i];
-                if (abs(head.x - tail.x) < 2 && abs(head.y - tail.y) < 2) {
-                    // knots are already touching
-                } else {
+                if (abs(head.x - tail.x) > 1 || abs(head.y - tail.y) > 1) {
                     if (head.x > tail.x) {
                         ++tail.x;
                     } else if (head.x < tail.x) {

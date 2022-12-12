@@ -4,7 +4,7 @@ Runner script requires `g++`.
 
 Usage:
 ```
-./run <year> <day> <input_type (example/real)>
+./run <year> <day> <input_type (example/actual)>
 ```
 
 Example inputs for each day are included.

@@ -6,7 +6,7 @@ day=$2
 input=$3
 
 # Compile
-g++ -std=c++17 "${year}/${day}.cpp" -o "${day}"
+g++ -std=c++17 -O2 "${year}/${day}.cpp" -o "${day}"
 
 # Execute
 start_time=$(date +%s%N);

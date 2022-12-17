@@ -161,7 +161,13 @@ int main() {
 
     int direction = 0;
     vector<vector<vector<block>>> shapes = {shape0, shape1, shape2, shape3, shape4};
-    for (int rock = 0; rock < 2022; ++rock) {
+    map<tuple<int, int, vector<vector<block>>>, pair<int, int>> MEM;
+    int rock = 0, moreRocksUntilDone = -1, prevHeight;
+    long long autoHeight;
+    while (true) {
+        if (moreRocksUntilDone == 0) {
+            break;
+        }
         int numberOfEmptyRows = 0;
         for (int y = chamber.size() - 1; y >= 0; --y) {
             if (isEmptyRow(y, chamber)) {
@@ -193,8 +199,40 @@ int main() {
                 break;
             }
         }
+
+        if (rock == 2021) {
+            cout << "Part 1: " << findHighest(chamber) + 1 << endl;
+        }
+
+        if (rock > 2021) {
+            vector<vector<block>> last10Rows;
+            for (int i = chamber.size() - 1; i > chamber.size() - 30; --i) {
+                last10Rows.push_back(chamber[i]);
+            }
+            tuple<int, int, vector<vector<block>>> t = make_tuple(direction, rock % 5, last10Rows);
+
+            if(moreRocksUntilDone == -1 && MEM.find(t) != MEM.end()) {
+                pair<int, int> prev = MEM[t];
+                long long cycleLength = (long long) rock - (long long) prev.first;
+                long long cycleHeight = (long long) findHighest(chamber) - (long long) prev.second;
+                long long rocksToDrop = 1000000000000LL - ((long long) rock + 1LL);
+                long long autoCycleCount = rocksToDrop / (long long) cycleLength;
+                long long autoCycleHeight = autoCycleCount * (long long) cycleHeight;
+                long long rocksDropped = (long long) rock + 1LL + ((long long) autoCycleCount * (long long) cycleLength);
+                autoHeight = autoCycleHeight + (long long) findHighest(chamber);
+                moreRocksUntilDone = 1000000000000LL - rocksDropped + 1LL;
+                prevHeight = findHighest(chamber);
+            } else {
+                MEM[t] = make_pair(rock, findHighest(chamber));
+            }
+        }
+        ++rock;
+        if (moreRocksUntilDone != -1) {
+            --moreRocksUntilDone;
+        }
     }
 
-    cout << "Part 1: " << findHighest(chamber) + 1 << endl;
+    long long heightToAdd = (long long) findHighest(chamber) - (long long) prevHeight + 1LL;
+    cout << "Part 2: " << autoHeight + heightToAdd << endl;
     return 0;
 }

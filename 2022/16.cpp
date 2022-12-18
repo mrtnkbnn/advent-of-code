@@ -1,19 +1,25 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int calculateMaxPressure(string valve, int timeLeft, map<string, int>& flowRates, vector<string>& valvesWithPressure, map<pair<string, string>, int>& distances, set<string> alreadyOpen) {
+int findPaths(string valve, int timeLeft, int currentScore, map<string, int>& flowRates, vector<string>& valvesWithPressure, map<pair<string, string>, int>& distances, vector<string> path, map<vector<string>, int>& paths) {
     if (timeLeft < 2) {
         return 0;
     }
     if (valve != "AA") {
-        alreadyOpen.insert(valve);
+        path.push_back(valve);
         --timeLeft;
     }
     int result = timeLeft * flowRates[valve];
+    if (valve != "AA") {
+        currentScore += result;
+        paths[path] = currentScore;
+    }
     vector<int> results;
     for (string neighbor : valvesWithPressure) {
-        if (find(alreadyOpen.begin(), alreadyOpen.end(), neighbor) == alreadyOpen.end()) {
-            results.push_back(calculateMaxPressure(neighbor, timeLeft - distances[{valve, neighbor}], flowRates, valvesWithPressure, distances, alreadyOpen));
+        if (find(path.begin(), path.end(), neighbor) == path.end()) {
+            int calculated = findPaths(neighbor, timeLeft - distances[{valve, neighbor}], currentScore, flowRates, valvesWithPressure, distances, path, paths);
+
+            results.push_back(calculated);
         }
     }
     int maxPath = 0;
@@ -21,6 +27,15 @@ int calculateMaxPressure(string valve, int timeLeft, map<string, int>& flowRates
         maxPath = max(r, maxPath);
     }
     return maxPath + result;
+}
+
+bool overlap(vector<string>& path1, vector<string>& path2) {
+    for (string s : path1) {
+        if (find(path2.begin(), path2.end(), s) != path2.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 int main() {
@@ -68,7 +83,22 @@ int main() {
         }
     }
 
-    set<string> alreadyOpen;
-    cout << "Part 1: " << calculateMaxPressure("AA", 30, flowRates, valvesWithPressure, distances, alreadyOpen) << endl;
+    vector<string> path1;
+    map<vector<string>, int> paths1;
+    cout << "Part 1: " << findPaths("AA", 30, 0, flowRates, valvesWithPressure, distances, path1, paths1) << endl;
+    vector<string> path2;
+    map<vector<string>, int> paths2;
+    findPaths("AA", 26, 0, flowRates, valvesWithPressure, distances, path2, paths2);
+    int part2 = 0;
+    for (auto &it1 : paths2) {
+        vector<string> first = it1.first;
+        for (auto &it2 : paths2) {
+            vector<string> second = it2.first;
+            if (!overlap(first, second)) {
+                part2 = max(part2, it1.second + it2.second);
+            }
+        }
+    }
+    cout << "Part 2: " << part2 << endl;
     return 0;
 }

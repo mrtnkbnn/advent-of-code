@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# Advent of Code helper script.
+#
+# Usage:
+#
+# Generating solution file with input files: ./aoc <year> <day> gen
+# For example: ./aoc 2023 01 gen
+#
+# Running solution with given input (example or actual): ./aoc <year> <day> run <input type>
+# For example: ./aoc 2023 01 run example
+
+readonly TEMPLATE="#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    return 0;
+}"
+
+gen() {
+  local year="$1"
+  local day="$2"
+
+  # Create year directory if doesn't exist
+  if [[ ! -d "${year}" ]]; then
+    mkdir "${year}"
+  fi
+
+  # Create inputs directory if doesn't exist
+  if [[ ! -d "${year}/inputs" ]]; then
+    mkdir "${year}/inputs"
+  fi
+
+  # Create solution file from template if doesn't exist
+  if [[ ! -f "${year}/${day}.cpp" ]]; then
+    touch "${year}/${day}.cpp"
+    echo "${TEMPLATE}" > "${year}/${day}.cpp"
+  fi
+
+  # Create example input file if doesn't exist
+  if [[ ! -f "${year}/inputs/${day}_example.in" ]]; then
+    touch "${year}/inputs/${day}_example.in"
+  fi
+
+  # Create actual input file if doesn't exist
+  if [[ ! -f "${year}/inputs/${day}_actual.in" ]]; then
+    touch "${year}/inputs/${day}_actual.in"
+  fi
+}
+
+run() {
+  local year="$1"
+  local day="$2"
+  local input="$3"
+
+  if [[ "${input}" != "example" && "${input}" != "actual" ]]; then
+    echo "Invalid input" >&2
+    exit 1
+  fi
+
+  if [[ ! -f "${year}/${day}.cpp" ]]; then
+    echo "Solution file not found" >&2
+    exit 1
+  fi
+
+  if [[ ! -f "${year}/inputs/${day}_${input}.in" ]]; then
+    echo "Input file not found" >&2
+    exit 1
+  fi
+
+  # Compile
+  g++ -std=c++17 -O2 "${year}/${day}.cpp" -o "${day}"
+
+  # Execute
+  start_time=$(date +%s%N);
+  "./${day}" < "${year}/inputs/${day}_${input}.in"
+  end_time=$(date +%s%N);
+
+  # Print
+  elapsed_time=$(((end_time - start_time) / 1000000))
+  echo "Running took ${elapsed_time}ms"
+
+  # Cleanup
+  rm "./${day}";
+}
+
+main() {
+  local year="$1"
+  local day="$2"
+  local action="$3"
+  local input="$4"
+  if [[ -z "${year}" ]]; then
+    echo "Year not specified" >&2
+    exit 1
+  elif [[ -z "${day}" ]]; then
+    echo "Day not specified" >&2
+    exit 1
+  elif [[ -z "${action}" ]]; then
+    echo "Action not specified" >&2
+    exit 1
+  else
+    if [[ "${action}" == "gen" ]]; then
+      gen "${year}" "${day}"
+    elif [[ "${action}" == "run" ]]; then
+      run "${year}" "${day}" "${input}"
+    else
+      echo "Invalid action" >&2
+      exit 1
+    fi
+    exit 0
+  fi
+}
+
+main "$@"

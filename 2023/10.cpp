@@ -37,7 +37,7 @@ int main() {
     vector<vector<char>> pipes;
     pos startingPosition;
     string line;
-    num rows = 0, cols = 0, loopSize = 0, inside = 0;;
+    num rows = 0, cols = 0, loopSize = 0, inside = 0;
     while (getline(cin, line)) {
         vector<char> row;
         for (num i = 0; i < line.size(); ++i) {

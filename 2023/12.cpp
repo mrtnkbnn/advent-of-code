@@ -2,89 +2,75 @@
 using namespace std;
 using num = long long;
 
-vector<num> findGroups(string record) {
-    vector<num> result;
-    num current = 0;
-    for (num i = 0; i < record.size(); ++i) {
-        char c = record[i];
-        if (c == '#') {
-            ++current;
+map<tuple<string, vector<num>, num>, num> MEM;
+
+num count(string record, vector<num> groups, num currentBlock) {
+    tuple<string, vector<num>, num> key = {record, groups, currentBlock};
+    if (MEM.find(key) != MEM.end()) {
+        return MEM[key];
+    }
+    if (record.length() == 0) {
+        if (currentBlock == 0 && groups.empty()) return 1;
+        else if (currentBlock > 0 && groups.size() == 1 && groups[0] == currentBlock) return 1;
+        else return 0;
+    }
+    if (record[0] == '.' && currentBlock == 0) {
+        return count(record.substr(1), groups, 0);
+    } else if (record[0] == '.' && currentBlock > 0) {
+        if (groups.size() == 0 || groups[0] != currentBlock) {
+            return 0;
         } else {
-            if (current > 0) result.push_back(current);
-            current = 0;
+            groups.erase(groups.begin());
+            return count(record.substr(1), groups, 0);
         }
-    }
-    if (current > 0) result.push_back(current);
-    return result;
-}
-
-vector<num> findGroupsSoFar(string record) {
-    vector<num> result;
-    num current = 0;
-    for (num i = 0; i < record.size(); ++i) {
-        char c = record[i];
-        if (c == '#') {
-            ++current;
-        } else if (c == '?') {
-            if (current > 0) result.push_back(current);
-            return result;
+    } else if (record[0] == '#') {
+        if (groups.empty()) {
+            return 0;
+        } else if (groups[0] == currentBlock + 1 && (record.length() > 1 && record[1] == '#')) {
+            return 0;
+        } else if (groups[0] == currentBlock + 1 && record.length() == 1) {
+            if (groups.size() == 1) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else if (groups[0] == currentBlock + 1 && record.length() > 1) {
+            if (record[1] == '#') {
+                return 0;
+            } else if (record[1] == '.') {
+                groups.erase(groups.begin());
+                return count(record.substr(2), groups, 0);
+            } else {
+                groups.erase(groups.begin());
+                return count(record.substr(2), groups, 0);
+            }
+        } else if (currentBlock + 1 > groups[0]) {
+            return 0;
         } else {
-            if (current > 0) result.push_back(current);
-            current = 0;
+
+            return count(record.substr(1), groups, currentBlock + 1);
         }
-    }
-    if (current > 0) result.push_back(current);
-    return result;
-}
-
-bool areEqual(vector<num> &group1, vector<num> &group2) {
-    if (group1.size() != group2.size()) return false;
-    for (num i = 0; i < group1.size(); ++i) {
-        if (group1[i] != group2[i]) return false;
-    }
-    return true;
-}
-
-bool isPossible(string record, vector<num> &groups) {
-    vector<num> groupsSoFar = findGroupsSoFar(record);
-    if (groupsSoFar.size() > groups.size()) return false;
-
-    if (groupsSoFar.size() == groups.size()) {
-        if (groupsSoFar[groupsSoFar.size() - 1] > groups[groups.size() - 1]) return false;
-        for (num i = 0; i < groups.size() - 1; ++i) {
-            if (groupsSoFar[i] != groups[i]) return false;
-        }
-    }
-
-    for (num i = 0; i < groupsSoFar.size(); ++i) {
-        if (i != groupsSoFar.size() - 1) {
-            if (groupsSoFar[i] != groups[i]) return false;
+    } else {
+        if (!groups.empty() && groups[0] == currentBlock && currentBlock > 0) {
+            groups.erase(groups.begin());
+            return count(record.substr(1), groups, 0);
+        } else if (!groups.empty() && currentBlock > groups[0]) {
+            return 0;
+        } else if (groups.empty() && currentBlock > 0) {
+            return 0;
+        } else if (groups.empty()) {
+            return count(record.substr(1), groups, 0);
         } else {
-            if (groupsSoFar[i] > groups[i]) return false;
+            num a = 0;
+            if (currentBlock == 0) {
+                a = count(record.substr(1), groups, 0);
+                MEM[{record.substr(1), groups, 0}] = a;
+            }
+            num b = count(record.substr(1), groups, currentBlock + 1);
+            MEM[{record.substr(1), groups, currentBlock + 1}] = b;
+            return a + b;
         }
     }
-    return true;
-}
-
-num count(string record, vector<num> &groups) {
-    num result = 0;
-    queue<string> q;
-    q.push(record);
-    while (!q.empty()) {
-        string current = q.front();
-        q.pop();
-        num i = current.find_first_of('?');
-        if (i == -1) {
-            vector<num> currentGroups = findGroups(current);
-            if (areEqual(groups, currentGroups)) ++result;
-        } else {
-            current[i] = '.';
-            if (isPossible(current, groups)) q.push(current);
-            current[i] = '#';
-            if (isPossible(current, groups)) q.push(current);
-        }
-    }
-    return result;
 }
 
 string unfold(string record, num times) {
@@ -114,8 +100,8 @@ int main() {
         while (ss >> n) groups.push_back(n);
         string r5 = unfold(record, 5);
         vector<num> g5 = unfold(groups, 5);
-        num folded = count(record, groups);
-        num unfolded = count(r5, g5);
+        num folded = count(record, groups, 0);
+        num unfolded = count(r5, g5, 0);
         part1 += folded;
         part2 += unfolded;
     }

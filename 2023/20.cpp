@@ -54,6 +54,10 @@ struct Module {
         return result;
     }
 
+    void reset() {
+        state = false;
+        for (auto &it : memory) it.second = false;
+    }
 };
 
 int main() {
@@ -94,6 +98,25 @@ int main() {
             for (Pulse &p : newPulses) q.push(p);
         }
     }
+    for (auto &it : modules) it.second->reset();
+    num dc = LONG_LONG_MAX, rv = LONG_LONG_MAX, vp = LONG_LONG_MAX, cq = LONG_LONG_MAX;
+    for (num i = 0; i < 10000; ++i) {
+        queue<Pulse> q;
+        q.push({{"button", "broadcaster"}, false});
+        while (!q.empty()) {
+            Pulse pulse = q.front();
+            q.pop();
+            if (pulse.first.first == "dc" && pulse.second) dc = min(dc, i + 1);
+            if (pulse.first.first == "rv" && pulse.second) rv = min(rv, i + 1);
+            if (pulse.first.first == "vp" && pulse.second) vp = min(vp, i + 1);
+            if (pulse.first.first == "cq" && pulse.second) cq = min(cq, i + 1);
+            if (modules.find(pulse.first.second) == modules.end()) continue;
+            vector<Pulse> newPulses = modules[pulse.first.second]->handle(pulse);
+            for (Pulse &p : newPulses) q.push(p);
+        }
+        if (dc != LONG_LONG_MAX && rv != LONG_LONG_MAX && vp != LONG_LONG_MAX && cq != LONG_LONG_MAX) break;
+    }
     cout << "Part 1: " << lows * highs << endl;
+    cout << "Part 2: " << lcm(1, lcm(dc, lcm(rv, lcm(vp, cq)))) << endl;
     return 0;
 }

@@ -2,80 +2,84 @@
 using namespace std;
 using num = long long;
 
-vector<num> findGroups(map<string, vector<string>> wires) {
-    vector<num> result;
-    vector<string> unvisited;
-    for (auto it : wires) unvisited.push_back(it.first);
-    while (!unvisited.empty()) {
-        num groupSize = 0;
-        string first = unvisited[0];
-        queue<string> q;
-        q.push(first);
-        while (!q.empty()) {
-            string current = q.front();
-            q.pop();
-            if (find(unvisited.begin(), unvisited.end(), current) == unvisited.end()) continue;
-            unvisited.erase(remove(unvisited.begin(), unvisited.end(), current), unvisited.end());
-            ++groupSize;
-            if (wires.find(current) != wires.end()) {
-                for (string next : wires[current]) {
-                    if(find(unvisited.begin(), unvisited.end(), next) != unvisited.end()) q.push(next);
-                }
+map<pair<string, string>, num> bfs(string start, map<string, vector<string>> &wires, map<string, bool> visited) {
+    map<pair<string, string>, num> result;
+    queue<string> q;
+    q.push(start);
+    visited[start] = true;
+    while (!q.empty()) {
+        string current = q.front();
+        q.pop();
+        for (string next : wires[current]) {
+            if (!visited[next]) {
+                q.push(next);
+                visited[next] = true;
+                ++result[{min(current, next), max(current, next)}];
             }
         }
-        result.push_back(groupSize);
     }
     return result;
 }
 
-void disconnect(pair<string, string> wire, map<string, vector<string>> &wires) {
-    wires[wire.first].erase(remove(wires[wire.first].begin(), wires[wire.first].end(), wire.second), wires[wire.first].end());
-    wires[wire.second].erase(remove(wires[wire.second].begin(), wires[wire.second].end(), wire.first), wires[wire.second].end());
-}
-
-pair<num, num> disconnect(vector<pair<string, string>> uq, map<string, vector<string>> wires) {
-    for (auto wire : uq) disconnect(wire, wires);
-    vector<num> groups = findGroups(wires);
-    if (groups.size() == 2) return {groups[0], groups[1]};
-    else return {-1, -1};
+pair<string, string> popular(set<string> &vertices, map<string, vector<string>> &wires, map<string, bool> visited) {
+    num mostPopularCount = LONG_LONG_MIN;
+    pair<string, string> mostPopular;
+    map<pair<string, string>, num> results;
+    for (string vertex : vertices) {
+        map<pair<string, string>, num> result = bfs(vertex, wires, visited);
+        for (auto it : result) results[it.first] += it.second;
+    }
+    for (auto it : results) {
+        if (it.second > mostPopularCount) {
+            mostPopularCount = it.second;
+            mostPopular = it.first;
+        }
+    }
+    return mostPopular;
 }
 
 int main() {
     string line;
     map<string, vector<string>> wires;
+    set<string> vertices;
     while (getline(cin, line)) {
-        string component1 = line.substr(0, line.find(":"));
+        string component = line.substr(0, line.find(":"));
+        vertices.insert(component);
         stringstream ss(line.substr(line.find(":") + 2));
-        string component2;
-        while (ss >> component2) {
-            if (wires.find(component1) == wires.end()) wires[component1] = {component2};
-            else wires[component1].push_back(component2);
-            if (wires.find(component2) == wires.end()) wires[component2] = {component1};
-            else wires[component2].push_back(component1);
+        string wire;
+        while (ss >> wire) {
+            vertices.insert(wire);
+            if (wires.find(component) == wires.end()) wires[component] = {wire};
+            else wires[component].push_back(wire);
+            if (wires.find(wire) == wires.end()) wires[wire] = {component};
+            else wires[wire].push_back(component);
         }
     }
-    vector<pair<string, string>> uq;
-    for (auto it1 : wires) {
-        for (auto it2 : wires) {
-            if (it1.first == it2.first) continue;
-            if (it2.first < it1.first) continue;
-            if (find(wires[it1.first].begin(), wires[it1.first].end(), it2.first) != wires[it1.first].end()) uq.push_back({it1.first, it2.first});
-        }
+    map<string, bool> visited;
+    for (string vertex : vertices) visited[vertex] = false;
+    for (num i = 0; i < 3; ++i) {
+        pair<string, string> result = popular(vertices, wires, visited);
+        wires[result.first].erase(find(wires[result.first].begin(), wires[result.first].end(), result.second));
+        wires[result.second].erase(find(wires[result.second].begin(), wires[result.second].end(), result.first));
+        if (wires[result.first].empty()) wires.erase(wires.find(result.first));
+        if (wires[result.second].empty()) wires.erase(wires.find(result.second));
     }
-    bool found = false;
-    for (num i = 0; i < uq.size(); ++i) {
-        if (found) break;
-        for (num j = i + 1; j < uq.size(); ++j) {
-            if (found) break;
-            for (num k = j + 1; k < uq.size(); ++k) {
-                if (found) break;
-                pair<num, num> result = disconnect({uq[i], uq[j], uq[k]}, wires);
-                if (result.first != -1 && result.second != -1) {
-                    cout << "Part 1: " << result.first * result.second << endl;
-                    found = true;
-                }
+    num groupSize = 0;
+    string start = *vertices.begin();
+    queue<string> q;
+    q.push(start);
+    visited[start] = true;
+    while (!q.empty()) {
+        string current = q.front();
+        q.pop();
+        ++groupSize;
+        for (string next : wires[current]) {
+            if (!visited[next]) {
+                q.push(next);
+                visited[next] = true;
             }
         }
     }
+    cout << "Part 1: " << groupSize * (vertices.size() - groupSize) << endl;
     return 0;
 }

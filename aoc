@@ -15,6 +15,9 @@ using namespace std;
 using num = long long;
 
 int main() {
+    num part1 = 0, part2 = 0;
+    cout << \"Part 1: \" << part1 << endl;
+    cout << \"Part 2: \" << part2 << endl;
     return 0;
 }"
 

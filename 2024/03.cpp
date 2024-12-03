@@ -4,7 +4,7 @@ using num = long long;
 
 int main() {
     num part1 = 0, part2 = 0;
-    regex r("mul\\(\\d+,\\d+\\)|do\\(\\)|don't");
+    regex r("mul\\(\\d+,\\d+\\)|do\\(\\)|don't\\(\\)");
     string memory;
     bool enabled = true;
     while (getline(cin, memory)) {
@@ -12,7 +12,7 @@ int main() {
             smatch match = *i;
             if (match.str() == "do()") {
                 enabled = true;
-            } else if (match.str() == "don't") {
+            } else if (match.str() == "don't()") {
                 enabled = false;
             } else {
                 num left = stoll(match.str().substr(4, match.str().find(",") - 4));

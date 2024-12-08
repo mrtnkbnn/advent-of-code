@@ -3,6 +3,26 @@ using namespace std;
 using num = long long;
 using coord = pair<num, num>;
 
+num count(map<char, set<coord>> &antennas, num rows, num cols, bool multiply) {
+    set<coord> result;
+    for (auto &[antenna, coords] : antennas) {
+        for (auto i = coords.begin(); i != coords.end(); ++i) {
+            for (auto j = next(i); j != coords.end(); ++j) {
+                coord left = *i;
+                coord right = *j;
+                for (num m = (multiply ? 0 : 1); m < (multiply ? max(rows, cols) : 2); ++m) {
+                    coord diff = {m * (left.first - right.first), m * (left.second - right.second)};
+                    vector<coord> antinodes = {{left.first + diff.first, left.second + diff.second}, {right.first - diff.first, right.second - diff.second}};
+                    for (auto antinode : antinodes) {
+                        if (antinode.first >= 0 && antinode.first < rows && antinode.second >= 0 && antinode.second < cols) result.insert(antinode);
+                    }
+                }
+            }
+        }
+    }
+    return result.size();
+}
+
 int main() {
     num rows = 0, cols;
     string line;
@@ -14,39 +34,7 @@ int main() {
         ++rows;
         cols = line.length();
     }
-    set<coord> antinodes;
-    set<coord> antinodes2;
-    for (auto &[antenna, coords] : antennas) {
-        for (auto i = coords.begin(); i != coords.end(); ++i) {
-            for (auto j = next(i); j != coords.end(); ++j) {
-                coord left = *i;
-                coord right = *j;
-                num rowD = left.first - right.first;
-                num colD = left.second - right.second;
-                vector<coord> poss = {{left.first + rowD, left.second + colD}, {right.first + rowD, right.second + colD}, {left.first - rowD, left.second - colD}, {right.first - rowD, right.second - colD}};
-                for (auto pos : poss) {
-                    if (pos != left && pos != right && pos.first >= 0 && pos.first < rows && pos.second >= 0 && pos.second < cols) antinodes.insert(pos);
-                }
-            }
-        }
-    }
-    for (auto &[antenna, coords] : antennas) {
-        for (auto i = coords.begin(); i != coords.end(); ++i) {
-            for (auto j = next(i); j != coords.end(); ++j) {
-                coord left = *i;
-                coord right = *j;
-                for (num m = 1; m < max(rows, cols); ++m) {
-                    num rowD = m * (left.first - right.first);
-                    num colD = m * (left.second - right.second);
-                    vector<coord> poss = {{left.first + rowD, left.second + colD}, {right.first + rowD, right.second + colD}, {left.first - rowD, left.second - colD}, {right.first - rowD, right.second - colD}};
-                    for (auto pos : poss) {
-                        if (pos.first >= 0 && pos.first < rows && pos.second >= 0 && pos.second < cols) antinodes2.insert(pos);
-                    }
-                }
-            }
-        }
-    }
-    cout << "Part 1: " << antinodes.size() << endl;
-    cout << "Part 2: " << antinodes2.size() << endl;
+    cout << "Part 1: " << count(antennas, rows, cols, false) << endl;
+    cout << "Part 2: " << count(antennas, rows, cols, true) << endl;
     return 0;
 }

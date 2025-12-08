@@ -18,15 +18,6 @@ num add(num a, num b, vector<num> &link, vector<num> &size) {
     return size[a];
 }
 
-bool all(vector<num> &link) {
-    for (num i = 0; i < link.size(); ++i) {
-        for (num j = i + 1; j < link.size(); ++j) {
-            if (find(i, link) != find(j, link)) return false;
-        }
-    }
-    return true;
-}
-
 int main() {
     num part1 = 0, part2 = 0;
     string line;

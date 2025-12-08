@@ -27,33 +27,37 @@ int main() {
         sscanf(line.c_str(), "%lld,%lld,%lld", &x, &y, &z);
         boxes.push_back({x, y, z});
     }
-    vector<tuple<double, num, num>> dists;
+    priority_queue<coord> dists;
     for (num i = 0; i < boxes.size(); ++i) {
         for (num j = i + 1; j < boxes.size(); ++j) {
             num dx = get<0>(boxes[i]) - get<0>(boxes[j]);
             num dy = get<1>(boxes[i]) - get<1>(boxes[j]);
             num dz = get<2>(boxes[i]) - get<2>(boxes[j]);
-            double dist = sqrt(dx * dx + dy * dy + dz * dz);
-            dists.push_back({dist, i, j});
+            num dist = dx * dx + dy * dy + dz * dz;
+            dists.push({-dist, i, j});
         }
     }
-    sort(dists.begin(), dists.end());
     vector<num> link(boxes.size()), size(boxes.size(), 1);
     for (num i = 0; i < boxes.size(); ++i) link[i] = i;
-    for (num i = 0; i < (boxes.size() == 20 ? 10 : 1000); ++i) add(get<1>(dists[i]), get<2>(dists[i]), link, size);
-    set<num> parents;
-    for (num i = 0; i < boxes.size(); ++i) parents.insert(find(i, link));
+    for (num i = 0; i < (boxes.size() == 20 ? 10 : 1000); ++i) {
+        coord dist = dists.top();
+        dists.pop();
+        add(get<1>(dist), get<2>(dist), link, size);
+    }
     vector<num> sizes;
-    for (num parent : parents) sizes.push_back(size[parent]);
-    sort(sizes.rbegin(), sizes.rend());
+    for (num i = 0; i < boxes.size(); ++i) {
+        if (link[i] == i) sizes.push_back(size[i]);
+    }
+    nth_element(sizes.begin(), sizes.begin() + 3, sizes.end(), greater<num>());
     part1 = sizes[0] * sizes[1] * sizes[2];
     num i = 0;
     while (true) {
-        if (add(get<1>(dists[i]), get<2>(dists[i]), link, size) == boxes.size()) {
-            part2 = get<0>(boxes[get<1>(dists[i])]) * get<0>(boxes[get<2>(dists[i])]);
+        coord dist = dists.top();
+        dists.pop();
+        if (add(get<1>(dist), get<2>(dist), link, size) == boxes.size()) {
+            part2 = get<0>(boxes[get<1>(dist)]) * get<0>(boxes[get<2>(dist)]);
             break;
         }
-        ++i;
     }
     cout << "Part 1: " << part1 << endl;
     cout << "Part 2: " << part2 << endl;

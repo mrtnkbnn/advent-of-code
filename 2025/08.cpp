@@ -40,7 +40,7 @@ int main() {
     sort(dists.begin(), dists.end());
     vector<num> link(boxes.size()), size(boxes.size(), 1);
     for (num i = 0; i < boxes.size(); ++i) link[i] = i;
-    for (num i = 0; i < 1000; ++i) add(get<1>(dists[i]), get<2>(dists[i]), link, size);
+    for (num i = 0; i < (boxes.size() == 20 ? 10 : 1000); ++i) add(get<1>(dists[i]), get<2>(dists[i]), link, size);
     set<num> parents;
     for (num i = 0; i < boxes.size(); ++i) parents.insert(find(i, link));
     vector<num> sizes;
